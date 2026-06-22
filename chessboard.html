@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Chessboard Calibration</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#fff; overflow-x:hidden; }
+  #board {
+    display:block; width:100vw; height:auto;
+    image-rendering:crisp-edges; image-rendering:pixelated;
+  }
+</style>
+</head>
+<body>
+<canvas id="board"></canvas>
+<script>
+// ── Board parameters — must match calibrate.py exactly ───────────────────────
+const CORNERS_W    = 6;      // portrait image: shorter side (cols in image)
+const CORNERS_H    = 8;      // portrait image: longer side  (rows in image)
+const BOARD_W      = 1000;   // target canvas width  (px)
+const BOARD_H      = 1250;   // target canvas height (px)
+
+// ── Derived (mirrors _generate_board_png_b64) ─────────────────────────────────
+const squares_w = CORNERS_W + 1;   // 7
+const squares_h = CORNERS_H + 1;   // 9
+const square_px = Math.min(
+  Math.floor(BOARD_W / (squares_w + 1)),
+  Math.floor(BOARD_H / (squares_h + 1))
+);
+const margin    = Math.floor(square_px / 2);  // half-square on all sides
+const top_extra = Math.floor(square_px * 3 / 2);          // full square + half extra on top
+
+const img_w = square_px * squares_w + 2 * margin;
+const img_h = square_px * squares_h + 2 * margin + top_extra;
+
+// ── Render ────────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('board');
+canvas.width  = img_w;
+canvas.height = img_h;
+
+const ctx = canvas.getContext('2d');
+
+// White background
+ctx.fillStyle = '#ffffff';
+ctx.fillRect(0, 0, img_w, img_h);
+
+// Draw squares: (row+col) % 2 === 0 → black (top-left corner is black)
+ctx.fillStyle = '#000000';
+for (let row = 0; row < squares_h; row++) {
+  for (let col = 0; col < squares_w; col++) {
+    if ((row + col) % 2 === 0) {
+      const x1 = margin + col * square_px;
+      const y1 = margin + top_extra + row * square_px;
+      ctx.fillRect(x1, y1, square_px, square_px);
+    }
+  }
+}
+</script>
+</body>
+</html>
